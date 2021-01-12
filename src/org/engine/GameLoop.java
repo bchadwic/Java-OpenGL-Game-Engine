@@ -5,23 +5,25 @@ import org.graphics.Renderer;
 import org.input.KeyInput;
 import org.world.Pane;
 
+/**
+ * GameLoop ensures that the loop runs at a consistent frame rate
+ */
 public class GameLoop {
 
     private static boolean running = false;
-    private static boolean paused = false;
 
     private static int updates = 0;
     private static final int MAX_UPDATES = 5;
 
     private static long lastUpdateTime = 0;
 
-    private static final int targetFPS = 100;
-    private static final int targetTime = 1000000000 / targetFPS;
+    private static final int TARGET_FPS = 100;
+    private static final int NANO_SECOND = 1000000000;
+    private static final int TARGET_TIME = NANO_SECOND / TARGET_FPS;
 
     public static void start() {
         Thread thread = new Thread(() -> {
             running = true;
-            paused = false;
 
             lastUpdateTime = System.nanoTime();
 
@@ -38,9 +40,9 @@ public class GameLoop {
 
                 long currentTime = System.nanoTime();
                 updates = 0;
-                while (currentTime - lastUpdateTime >= targetTime) {
+                while (currentTime - lastUpdateTime >= TARGET_TIME) {
                     Pane.update();
-                    lastUpdateTime += targetTime;
+                    lastUpdateTime += TARGET_TIME;
                     updates++;
 
                     if (updates > MAX_UPDATES) {
@@ -52,15 +54,15 @@ public class GameLoop {
 
                 fps++;
                 if (System.nanoTime() >= lastFpsCheck + 1000000000) {
-                    /*System.out.println(fps);*/
+                    System.out.println(fps);
                     fps = 0;
                     lastFpsCheck = System.nanoTime();
                 }
 
                 long timeTaken = System.nanoTime() - currentTime;
-                if (targetTime > timeTaken) {
+                if (TARGET_TIME > timeTaken) {
                     try {
-                        Thread.sleep((targetTime - timeTaken) / 1000000);
+                        Thread.sleep((TARGET_TIME - timeTaken) / 1000000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -73,6 +75,6 @@ public class GameLoop {
     }
 
     public static float updateDelta() {
-        return 1.0f / 1000000000 * targetTime;
+        return 1.0f / NANO_SECOND * TARGET_TIME;
     }
 }
